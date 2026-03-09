@@ -16,8 +16,15 @@
 <div id="alerts"></div>
 </div>
 
+<div class="map">
+<h2>Mapa dos Flats</h2>
+<div id="map"></div>
+</div>
+
 <div class="form">
 <h2>Nova Reserva</h2>
+
+<label>Flat</label>
 <select id="apt">
 <option>008A</option>
 <option>223B</option>
@@ -26,11 +33,37 @@
 <option>121A</option>
 </select>
 
-<input id="guest" placeholder="Hóspede">
+<label>Hóspede</label>
+<input id="guest">
+
+<label>Check-in</label>
 <input id="checkin" type="date">
+
+<label>Check-out</label>
 <input id="checkout" type="date">
 
+<label>Valor da reserva</label>
+<input id="value" type="number">
+
+<label>Operadora</label>
+<select id="operator">
+<option>Airbnb</option>
+<option>Booking</option>
+<option>Direto</option>
+<option>Decolar</option>
+<option>Expedia</option>
+<option>Outro</option>
+</select>
+
+<label>Limpeza</label>
+<select id="cleaning">
+<option value="80">80</option>
+<option value="120">120</option>
+<option value="150">150</option>
+</select>
+
 <button onclick="addReservation()">Salvar</button>
+
 </div>
 
 <h2>Reservas</h2>
@@ -39,13 +72,19 @@
 <tr>
 <th>Flat</th>
 <th>Hóspede</th>
-<th>Check‑in</th>
-<th>Check‑out</th>
+<th>Check-in</th>
+<th>Check-out</th>
+<th>Valor</th>
+<th>Líquido</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
+<h2>Resumo Financeiro</h2>
+<div id="finance"></div>
+
 <script type="module" src="app.js"></script>
+
 </body>
 </html>
