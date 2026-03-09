@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flats Manager</title>
+<link rel="manifest" href="manifest.json">
+<style>
+body{font-family:Arial;margin:10px;background:#f4f6f8}
+h1{margin:10px 0}
+.card{background:white;padding:12px;border-radius:8px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+input,select,button{padding:6px;margin:4px}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ddd;padding:5px;text-align:center;font-size:12px}
+th{background:#eee}
+.oc{background:#ff9c9c}
+.lv{background:#b8f7b8}
+</style>
+</head>
+
+<body>
+
+<h1>Flats Manager</h1>
+
+<div class="card">
+<h3>Nova Reserva</h3>
+
+<select id="apt">
+<option>008A</option>
+<option>223B</option>
+<option>210D</option>
+<option>114C</option>
+<option>121A</option>
+</select>
+
+<input id="hospede" placeholder="Hóspede">
+<input id="checkin" type="date">
+<input id="checkout" type="date">
+<input id="valor" type="number" placeholder="Valor">
+
+<button onclick="add()">Salvar</button>
+
+</div>
+
+<div class="card">
+<h3>Dashboard</h3>
+<div>Total reservas: <span id="totalRes">0</span></div>
+<div>Faturamento: R$ <span id="fatTotal">0</span></div>
+<div id="alerts"></div>
+</div>
+
+<div class="card">
+<h3>Reservas</h3>
+<input id="search" placeholder="Buscar hóspede..." oninput="render()">
+<table id="tab">
+<thead>
+<tr>
+<th>Apto</th>
+<th>Hóspede</th>
+<th>Check-in</th>
+<th>Check-out</th>
+<th>Valor</th>
+<th></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>Mapa de Ocupação (30 dias)</h3>
+<table id="map"></table>
+</div>
+
+<div class="card">
+<button onclick="backup()">Backup</button>
+<input type="file" onchange="restore(event)">
+</div>
+
+<script>
+
+let flats=["008A","223B","210D","114C","121A"]
+let data=JSON.parse(localStorage.getItem("pms5")||"[]")
+
+if("Notification" in window){
+Notification.requestPermission()
+}
+
+function save(){
+localStorage.setItem("pms5",JSON.stringify(data))
+render()
+}
+
+function add(){
+
+let r={
+apt:apt.value,
+hospede:hospede.value,
+checkin:checkin.value,
+checkout:checkout.value,
+valor:Number(valor.value)
+}
+
+data.push(r)
+save()
+
+}
+
+function del(i){
+data.splice(i,1)
+save()
+}
+
+function render(){
+
+let searchTerm=search.value.toLowerCase()
+
+let tb=document.querySelector("#tab tbody")
+tb.innerHTML=""
+
+let total=0
+
+data.forEach((r,i)=>{
+
+if(searchTerm && !r.hospede.toLowerCase().includes(searchTerm)) return
+
+total+=r.valor||0
+
+tb.innerHTML+=`
+<tr>
+<td>${r.apt}</td>
+<td>${r.hospede}</td>
+<td>${new Date(r.checkin).toLocaleDateString()}</td>
+<td>${new Date(r.checkout).toLocaleDateString()}</td>
+<td>${r.valor}</td>
+<td><button onclick="del(${i})">X</button></td>
+</tr>
+`
+})
+
+totalRes.innerText=data.length
+fatTotal.innerText=total.toLocaleString("pt-BR")
+
+alerts()
+mapa()
+
+}
+
+function alerts(){
+
+let today=new Date()
+let tomorrow=new Date()
+tomorrow.setDate(today.getDate()+1)
+
+let msg=""
+
+data.forEach(r=>{
+
+let ci=new Date(r.checkin)
+let co=new Date(r.checkout)
+
+if(ci.toDateString()==today.toDateString()){
+
+msg+="Check-in hoje: "+r.hospede+" ("+r.apt+")<br>"
+
+notify("Check-in hoje",r.hospede+" - "+r.apt)
+
+}
+
+if(ci.toDateString()==tomorrow.toDateString()){
+
+msg+="Check-in amanhã: "+r.hospede+" ("+r.apt+")<br>"
+
+}
+
+if(co.toDateString()==today.toDateString()){
+
+msg+="Check-out hoje: "+r.hospede+" ("+r.apt+")<br>"
+
+}
+
+})
+
+alerts.innerHTML=msg
+
+}
+
+function notify(title,msg){
+
+if(Notification.permission==="granted"){
+
+new Notification(title,{body:msg})
+
+}
+
+}
+
+function mapa(){
+
+let map=document.getElementById("map")
+map.innerHTML=""
+
+let header="<tr><th>Flat</th>"
+
+let days=[]
+
+for(let i=0;i<30;i++){
+
+let d=new Date()
+d.setDate(d.getDate()+i)
+
+days.push(new Date(d))
+
+header+=`<th>${d.getDate()}/${d.getMonth()+1}</th>`
+
+}
+
+header+="</tr>"
+
+map.innerHTML+=header
+
+flats.forEach(f=>{
+
+let row=`<tr><th>${f}</th>`
+
+days.forEach(d=>{
+
+let occ=false
+
+data.forEach(r=>{
+
+let ci=new Date(r.checkin)
+let co=new Date(r.checkout)
+
+if(r.apt==f && d>=ci && d<co){
+occ=true
+}
+
+})
+
+row+=`<td class="${occ?'oc':'lv'}"></td>`
+
+})
+
+row+="</tr>"
+
+map.innerHTML+=row
+
+})
+
+}
+
+function backup(){
+
+let blob=new Blob([JSON.stringify(data)],{type:"application/json"})
+
+let a=document.createElement("a")
+
+a.href=URL.createObjectURL(blob)
+a.download="flats_backup.json"
+a.click()
+
+}
+
+function restore(e){
+
+let file=e.target.files[0]
+
+let reader=new FileReader()
+
+reader.onload=function(evt){
+
+data=JSON.parse(evt.target.result)
+save()
+
+}
+
+reader.readAsText(file)
+
+}
+
+render()
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register("sw.js")
+
+}
+
+</script>
+
+</body>
+</html>
