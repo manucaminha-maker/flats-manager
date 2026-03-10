@@ -75,7 +75,10 @@ let totalCommission=0
 let totalCleaning=0
 let totalNet=0
 
-const today=new Date().toISOString().split("T")[0]
+const now = new Date()
+const today = now.getFullYear() + "-" + 
+("0"+(now.getMonth()+1)).slice(-2) + "-" + 
+("0"+now.getDate()).slice(-2)
 
 Object.values(data).forEach(r=>{
 
