@@ -1,19 +1,79 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flats Manager</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f8;
+margin:20px;
+}
+
+h1{
+margin-bottom:20px;
+}
+
+input,select{
+padding:6px;
+width:100%;
+}
+
+button{
+padding:6px;
+cursor:pointer;
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+background:white;
+margin-top:10px;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:6px;
+text-align:center;
+}
+
+.map{
+margin:10px 0;
+}
+
+.flat{
+background:#eee;
+padding:8px;
+margin:4px;
+display:inline-block;
+border-radius:4px;
+}
+
+.box{
+background:white;
+padding:10px;
+margin-bottom:15px;
+}
+
+</style>
+
 </head>
+
 <body>
 
 <h1>Flats Manager</h1>
 
-<div class="alerts">
+<div class="box">
 <h2>Alertas</h2>
 <div id="alerts"></div>
+</div>
+
+<div class="box">
+<h2>Faxinas do Dia</h2>
+<div id="cleaningList"></div>
 </div>
 
 <div class="map">
@@ -21,13 +81,11 @@
 <div id="map"></div>
 </div>
 
-  <h2>Mapa de Ocupação</h2>
+<h2>Mapa de Ocupação</h2>
 <div id="calendar"></div>
 
-  <h2>Faxinas do Dia</h2>
-<div id="cleaningList"></div>
-  
-<div class="form">
+<div class="box">
+
 <h2>Nova Reserva</h2>
 
 <label>Flat</label>
@@ -48,7 +106,7 @@
 <label>Check-out</label>
 <input id="checkout" type="date">
 
-<label>Valor da reserva</label>
+<label>Valor</label>
 <input id="value" type="number">
 
 <label>Operadora</label>
@@ -68,12 +126,14 @@
 <option value="150">150</option>
 </select>
 
-<button onclick="addReservation()">Salvar</button>
+<button onclick="addReservation()">Salvar Reserva</button>
 
 </div>
 
 <h2>Reservas</h2>
+
 <table id="table">
+
 <thead>
 <tr>
 <th>Flat</th>
@@ -82,9 +142,12 @@
 <th>Check-out</th>
 <th>Valor</th>
 <th>Líquido</th>
+<th>Ações</th>
 </tr>
 </thead>
+
 <tbody></tbody>
+
 </table>
 
 <h2>Resumo Financeiro</h2>
