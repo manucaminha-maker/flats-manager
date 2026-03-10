@@ -9,12 +9,8 @@
 
 body{
 font-family:Arial;
-background:#f4f6f8;
+background:#f5f6fa;
 margin:20px;
-}
-
-h1{
-margin-bottom:20px;
 }
 
 input,select{
@@ -40,13 +36,9 @@ padding:6px;
 text-align:center;
 }
 
-.map{
-margin:10px 0;
-}
-
 .flat{
 background:#eee;
-padding:8px;
+padding:6px;
 margin:4px;
 display:inline-block;
 border-radius:4px;
@@ -56,6 +48,28 @@ border-radius:4px;
 background:white;
 padding:10px;
 margin-bottom:15px;
+}
+
+.calendar td{
+width:25px;
+height:25px;
+}
+
+.free{
+background:#dff9fb;
+}
+
+.occupied{
+background:#ff7675;
+color:white;
+}
+
+.checkin{
+background:#f6e58d;
+}
+
+.checkout{
+background:#ffbe76;
 }
 
 </style>
@@ -76,13 +90,15 @@ margin-bottom:15px;
 <div id="cleaningList"></div>
 </div>
 
-<div class="map">
+<div class="box">
 <h2>Mapa dos Flats</h2>
 <div id="map"></div>
 </div>
 
+<div class="box">
 <h2>Mapa de Ocupação</h2>
 <div id="calendar"></div>
+</div>
 
 <div class="box">
 
