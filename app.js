@@ -26,8 +26,8 @@ Direto:0,
 Outro:0
 }
 
-function dateOverlap(aStart,aEnd,bStart,bEnd){
-return (aStart < bEnd && aEnd > bStart)
+function overlap(a1,a2,b1,b2){
+return a1<b2 && a2>b1
 }
 
 window.addReservation=function(){
@@ -44,12 +44,9 @@ for(const r of Object.values(reservationsCache)){
 
 if(r.apt===apt){
 
-if(dateOverlap(checkin,checkout,r.checkin,r.checkout)){
-
+if(overlap(checkin,checkout,r.checkin,r.checkout)){
 alert("Este flat já está reservado nesse período")
-
 return
-
 }
 
 }
@@ -74,23 +71,17 @@ cleaningDone:false
 
 }
 
-window.markCleaningDone=function(id){
-
+window.markCleaningDone=id=>{
 update(ref(db,"reservations/"+id),{cleaningDone:true})
-
 }
 
-window.deleteReservation=function(id){
-
+window.deleteReservation=id=>{
 if(confirm("Excluir reserva?")){
-
 remove(ref(db,"reservations/"+id))
-
+}
 }
 
-}
-
-window.editReservation=function(id){
+window.editReservation=id=>{
 
 const r=reservationsCache[id]
 
@@ -125,7 +116,6 @@ cleaningList.innerHTML=""
 finance.innerHTML=""
 
 const data=snapshot.val()
-
 if(!data) return
 
 reservationsCache=data
@@ -135,15 +125,7 @@ let totalCommission=0
 let totalCleaning=0
 let totalNet=0
 
-const now=new Date()
-
-const today=now.toISOString().split("T")[0]
-
-const tomorrowDate=new Date()
-
-tomorrowDate.setDate(tomorrowDate.getDate()+1)
-
-const tomorrow=tomorrowDate.toISOString().split("T")[0]
+const today=new Date().toISOString().split("T")[0]
 
 Object.entries(data).forEach(([id,r])=>{
 
@@ -173,10 +155,6 @@ if(r.checkin===today){
 alerts.innerHTML+=`⚠️ Check-in hoje: ${r.guest} (${r.apt})<br>`
 }
 
-if(r.checkin===tomorrow){
-alerts.innerHTML+=`📅 Check-in amanhã: ${r.guest} (${r.apt})<br>`
-}
-
 if(r.checkout===today){
 
 alerts.innerHTML+=`⚠️ Check-out hoje: ${r.guest} (${r.apt})<br>`
@@ -204,24 +182,71 @@ flats.forEach(f=>{
 let status="🟢"
 
 Object.values(data).forEach(r=>{
-
 if(r.apt===f){
-
 if(today>=r.checkin && today<r.checkout){
 status="🔴"
 }
-
 }
-
 })
 
 const div=document.createElement("div")
 div.className="flat"
 div.innerHTML=`${f} ${status}`
-
 map.appendChild(div)
 
 })
+
+let html="<table class='calendar'><tr><th>Flat</th>"
+
+for(let d=1;d<=31;d++){
+html+=`<th>${d}</th>`
+}
+
+html+="</tr>"
+
+flats.forEach(f=>{
+
+html+=`<tr><td>${f}</td>`
+
+for(let d=1;d<=31;d++){
+
+let className="free"
+
+Object.values(data).forEach(r=>{
+
+if(r.apt===f){
+
+const month=new Date().toISOString().slice(0,7)
+const day=("0"+d).slice(-2)
+const date=`${month}-${day}`
+
+if(date>=r.checkin && date<r.checkout){
+className="occupied"
+}
+
+if(date===r.checkin){
+className="checkin"
+}
+
+if(date===r.checkout){
+className="checkout"
+}
+
+}
+
+})
+
+html+=`<td class="${className}"></td>`
+
+}
+
+html+="</tr>"
+
+})
+
+html+="</table>"
+
+calendar.innerHTML=html
 
 finance.innerHTML=`
 Total reservas: R$ ${total.toFixed(2)} <br>
