@@ -1,4 +1,3 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -23,7 +22,7 @@ Decolar:0.17,
 Expedia:0.15,
 Direto:0,
 Outro:0
-}
+};
 
 window.addReservation = function(){
 
