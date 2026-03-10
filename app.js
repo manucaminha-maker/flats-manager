@@ -38,7 +38,7 @@ const commission=value*commissions[operator]
 const net=value-commission-cleaning
 
 push(reservationsRef,{
-apt,guest,checkin,checkout,value,operator,cleaning,commission,net
+apt,guest,checkin,checkout,value,operator,cleaning,commission,net,cleaningDone:false
 })
 
 }
@@ -88,12 +88,16 @@ totalCommission += r.commission || 0
 totalCleaning += r.cleaning || 0
 totalNet += r.net || 0
 
-if(r.checkin===today){
-alerts.innerHTML+=`<div>Check-in hoje: ${r.guest} (${r.apt})</div>`
+if(r.checkout===today){
+
+alerts.innerHTML+=`<div>⚠️ Check-out hoje: ${r.guest} (${r.apt})</div>`
+
+if(!r.cleaningDone){
+alerts.innerHTML+=`<div>🧹 Faxina necessária: ${r.apt}</div>`
+}else{
+alerts.innerHTML+=`<div>✅ Faxina feita: ${r.apt}</div>`
 }
 
-if(r.checkout===today){
-alerts.innerHTML+=`<div>Check-out hoje: ${r.guest} (${r.apt})</div>`
 }
 
 })
