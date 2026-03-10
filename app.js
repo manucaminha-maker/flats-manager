@@ -65,6 +65,7 @@ onValue(reservationsRef,(snapshot)=>{
 
 table.innerHTML=""
 alerts.innerHTML=""
+cleaningList.innerHTML=""
 map.innerHTML=""
 finance.innerHTML=""
 
