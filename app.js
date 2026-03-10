@@ -85,10 +85,10 @@ tr.innerHTML=`
 
 table.appendChild(tr)
 
-total+=r.value
-totalCommission+=r.commission
-totalCleaning+=r.cleaning
-totalNet+=r.net
+total += r.value || 0
+totalCommission += r.commission || 0
+totalCleaning += r.cleaning || 0
+totalNet += r.net || 0
 
 if(r.checkin===today){
 alerts.innerHTML+=`<div>Check-in hoje: ${r.guest} (${r.apt})</div>`
