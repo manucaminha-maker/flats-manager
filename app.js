@@ -177,25 +177,6 @@ cleaningList.innerHTML+=`
 
 })
 
-flats.forEach(f=>{
-
-let status="🟢"
-
-Object.values(data).forEach(r=>{
-if(r.apt===f){
-if(today>=r.checkin && today<r.checkout){
-status="🔴"
-}
-}
-})
-
-const div=document.createElement("div")
-div.className="flat"
-div.innerHTML=`${f} ${status}`
-map.appendChild(div)
-
-})
-
 let html="<table class='calendar'><tr><th>Flat</th>"
 
 for(let d=1;d<=31;d++){
