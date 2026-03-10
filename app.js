@@ -24,7 +24,7 @@ Direto:0,
 Outro:0
 };
 
-window.addReservation = function(){
+window.addReservation=function(){
 
 const apt=document.getElementById("apt").value
 const guest=document.getElementById("guest").value
@@ -56,9 +56,7 @@ window.markCleaningDone=function(id){
 
 const cleaningRef=ref(db,"reservations/"+id)
 
-update(cleaningRef,{
-cleaningDone:true
-})
+update(cleaningRef,{cleaningDone:true})
 
 }
 
@@ -88,7 +86,13 @@ let totalCleaning=0
 let totalNet=0
 
 const now=new Date()
+
 const today=now.getFullYear()+"-"+("0"+(now.getMonth()+1)).slice(-2)+"-"+("0"+now.getDate()).slice(-2)
+
+const tomorrowDate=new Date()
+tomorrowDate.setDate(tomorrowDate.getDate()+1)
+
+const tomorrow=tomorrowDate.getFullYear()+"-"+("0"+(tomorrowDate.getMonth()+1)).slice(-2)+"-"+("0"+tomorrowDate.getDate()).slice(-2)
 
 Object.entries(data).forEach(([id,r])=>{
 
@@ -109,6 +113,14 @@ total+=r.value||0
 totalCommission+=r.commission||0
 totalCleaning+=r.cleaning||0
 totalNet+=r.net||0
+
+if(r.checkin===today){
+alerts.innerHTML+=`<div>⚠️ Check-in hoje: ${r.guest} (${r.apt})</div>`
+}
+
+if(r.checkin===tomorrow){
+alerts.innerHTML+=`<div>📅 Check-in amanhã: ${r.guest} (${r.apt})</div>`
+}
 
 if(r.checkout===today){
 
