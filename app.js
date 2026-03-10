@@ -25,8 +25,8 @@ Direto:0,
 Outro:0
 }
 
-window.addReservation = function(){
-
+window.addReservation = function(){ 
+ 
 const apt=document.getElementById("apt").value
 const guest=document.getElementById("guest").value
 const checkin=document.getElementById("checkin").value
