@@ -16,6 +16,7 @@ const db=getDatabase(app)
 const reservationsRef=ref(db,"reservations")
 
 let reservationsCache={}
+let editingId=null
 
 const commissions={
 Airbnb:0.05,
@@ -56,7 +57,7 @@ return
 const commission=value*commissions[operator]
 const net=value-commission-cleaning
 
-push(reservationsRef,{
+const data={
 apt,
 guest,
 checkin,
@@ -65,20 +66,24 @@ value,
 operator,
 cleaning,
 commission,
-net,
+net
+}
+
+if(editingId){
+
+update(ref(db,"reservations/"+editingId),data)
+
+editingId=null
+
+}else{
+
+push(reservationsRef,{
+...data,
 cleaningDone:false
 })
 
 }
 
-window.markCleaningDone=id=>{
-update(ref(db,"reservations/"+id),{cleaningDone:true})
-}
-
-window.deleteReservation=id=>{
-if(confirm("Excluir reserva?")){
-remove(ref(db,"reservations/"+id))
-}
 }
 
 window.editReservation=id=>{
@@ -93,8 +98,18 @@ document.getElementById("value").value=r.value
 document.getElementById("operator").value=r.operator
 document.getElementById("cleaning").value=r.cleaning
 
-deleteReservation(id)
+editingId=id
 
+}
+
+window.deleteReservation=id=>{
+if(confirm("Excluir reserva?")){
+remove(ref(db,"reservations/"+id))
+}
+}
+
+window.markCleaningDone=id=>{
+update(ref(db,"reservations/"+id),{cleaningDone:true})
 }
 
 const table=document.querySelector("#table tbody")
