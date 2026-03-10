@@ -42,7 +42,6 @@ push(reservationsRef,{
 apt,guest,checkin,checkout,value,operator,cleaning,commission,net
 })
 
-}
 
 const table=document.querySelector("#table tbody")
 const alerts=document.getElementById("alerts")
