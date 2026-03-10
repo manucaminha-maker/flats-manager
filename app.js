@@ -38,20 +38,30 @@ const commission=value*commissions[operator]
 const net=value-commission-cleaning
 
 push(reservationsRef,{
-apt,guest,checkin,checkout,value,operator,cleaning,commission,net,cleaningDone:false
+apt,
+guest,
+checkin,
+checkout,
+value,
+operator,
+cleaning,
+commission,
+net,
+cleaningDone:false
 })
 
 }
 
-window.markCleaningDone = function(id){
+window.markCleaningDone=function(id){
 
-const cleaningRef = ref(db,"reservations/"+id)
+const cleaningRef=ref(db,"reservations/"+id)
 
 update(cleaningRef,{
 cleaningDone:true
 })
 
 }
+
 const table=document.querySelector("#table tbody")
 const alerts=document.getElementById("alerts")
 const map=document.getElementById("map")
@@ -77,12 +87,10 @@ let totalCommission=0
 let totalCleaning=0
 let totalNet=0
 
-const now = new Date()
-const today = now.getFullYear() + "-" + 
-("0"+(now.getMonth()+1)).slice(-2) + "-" + 
-("0"+now.getDate()).slice(-2)
+const now=new Date()
+const today=now.getFullYear()+"-"+("0"+(now.getMonth()+1)).slice(-2)+"-"+("0"+now.getDate()).slice(-2)
 
-Object.values(data).forEach(r=>{
+Object.entries(data).forEach(([id,r])=>{
 
 const tr=document.createElement("tr")
 
@@ -91,25 +99,41 @@ tr.innerHTML=`
 <td>${r.guest}</td>
 <td>${r.checkin}</td>
 <td>${r.checkout}</td>
-<td>R$ ${(r.value || 0).toFixed(2)}</td>
-<td>R$ ${(r.net || 0).toFixed(2)}</td>
+<td>R$ ${(r.value||0).toFixed(2)}</td>
+<td>R$ ${(r.net||0).toFixed(2)}</td>
 `
 
 table.appendChild(tr)
 
-total += r.value || 0
-totalCommission += r.commission || 0
-totalCleaning += r.cleaning || 0
-totalNet += r.net || 0
+total+=r.value||0
+totalCommission+=r.commission||0
+totalCleaning+=r.cleaning||0
+totalNet+=r.net||0
 
 if(r.checkout===today){
 
 alerts.innerHTML+=`<div>⚠️ Check-out hoje: ${r.guest} (${r.apt})</div>`
 
 if(!r.cleaningDone){
-alerts.innerHTML+=`<div>🧹 Faxina necessária: ${r.apt}</div>`
+
+alerts.innerHTML+=`
+<div>
+🧹 Faxina necessária: ${r.apt}
+<button onclick="markCleaningDone('${id}')">Faxina feita</button>
+</div>
+`
+
+cleaningList.innerHTML+=`
+<div>
+🧹 Flat ${r.apt} – saída de ${r.guest}
+<button onclick="markCleaningDone('${id}')">✔</button>
+</div>
+`
+
 }else{
+
 alerts.innerHTML+=`<div>✅ Faxina feita: ${r.apt}</div>`
+
 }
 
 }
@@ -128,17 +152,6 @@ if(today>=r.checkin && today<r.checkout){
 status="🔴"
 }
 
-if(r.checkout===today){
-
-alerts.innerHTML+=`<div>⚠️ Check-out hoje: ${r.guest} (${r.apt})</div>`
-alerts.innerHTML+=`<div>🧹 Faxina necessária: ${r.apt}</div>`
-
-cleaningList.innerHTML+=`
-<div>
-🧹 Flat ${r.apt} – saída de ${r.guest}
-</div>
-`
-
 }
 
 })
@@ -149,11 +162,12 @@ div.innerHTML=`${f} ${status}`
 map.appendChild(div)
 
 })
+
 calendar.innerHTML=""
 
 let html="<table border='1'><tr><th>Flat</th>"
 
-for(let d=1; d<=31; d++){
+for(let d=1;d<=31;d++){
 html+=`<th>${d}</th>`
 }
 
@@ -163,7 +177,7 @@ flats.forEach(f=>{
 
 html+=`<tr><td>${f}</td>`
 
-for(let d=1; d<=31; d++){
+for(let d=1;d<=31;d++){
 
 let status="🟢"
 
@@ -202,6 +216,7 @@ html+="</tr>"
 html+="</table>"
 
 calendar.innerHTML=html
+
 finance.innerHTML=`
 Total reservas: R$ ${total.toFixed(2)} <br>
 Comissões: R$ ${totalCommission.toFixed(2)} <br>
