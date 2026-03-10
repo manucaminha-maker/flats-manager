@@ -102,12 +102,35 @@ alerts.innerHTML+=`<div>Check-out hoje: ${r.guest} (${r.apt})</div>`
 
 flats.forEach(f=>{
 
-let occupied=false
+let status="🟢"
 
 Object.values(data).forEach(r=>{
+
+const today=new Date().toISOString().split("T")[0]
+
 if(r.apt===f){
-occupied=true
+
+if(today>=r.checkin && today<r.checkout){
+status="🔴"
 }
+
+if(today===r.checkin){
+status="🟡"
+}
+
+if(today===r.checkout){
+status="🟠"
+}
+
+}
+
+})
+
+const div=document.createElement("div")
+div.className="flat"
+div.innerHTML=`${f} ${status}`
+map.appendChild(div)
+
 })
 
 const div=document.createElement("div")
