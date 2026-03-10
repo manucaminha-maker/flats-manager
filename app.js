@@ -128,13 +128,16 @@ if(today>=r.checkin && today<r.checkout){
 status="🔴"
 }
 
-if(today===r.checkin){
-status="🟡"
-}
+if(r.checkout===today){
 
-if(today===r.checkout){
-status="🟠"
-}
+alerts.innerHTML+=`<div>⚠️ Check-out hoje: ${r.guest} (${r.apt})</div>`
+alerts.innerHTML+=`<div>🧹 Faxina necessária: ${r.apt}</div>`
+
+cleaningList.innerHTML+=`
+<div>
+🧹 Flat ${r.apt} – saída de ${r.guest}
+</div>
+`
 
 }
 
