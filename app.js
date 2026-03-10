@@ -46,6 +46,7 @@ apt,guest,checkin,checkout,value,operator,cleaning,commission,net
 const table=document.querySelector("#table tbody")
 const alerts=document.getElementById("alerts")
 const map=document.getElementById("map")
+const calendar=document.getElementById("calendar")
 const finance=document.getElementById("finance")
 
 const flats=["008A","223B","210D","114C","121A"]
@@ -127,7 +128,59 @@ div.innerHTML=`${f} ${status}`
 map.appendChild(div)
 
 })
+calendar.innerHTML=""
 
+let html="<table border='1'><tr><th>Flat</th>"
+
+for(let d=1; d<=31; d++){
+html+=`<th>${d}</th>`
+}
+
+html+="</tr>"
+
+flats.forEach(f=>{
+
+html+=`<tr><td>${f}</td>`
+
+for(let d=1; d<=31; d++){
+
+let status="🟢"
+
+Object.values(data).forEach(r=>{
+
+if(r.apt===f){
+
+const month=new Date().toISOString().slice(0,7)
+const day=("0"+d).slice(-2)
+const date=`${month}-${day}`
+
+if(date>=r.checkin && date<r.checkout){
+status="🔴"
+}
+
+if(date===r.checkin){
+status="🟡"
+}
+
+if(date===r.checkout){
+status="🟠"
+}
+
+}
+
+})
+
+html+=`<td>${status}</td>`
+
+}
+
+html+="</tr>"
+
+})
+
+html+="</table>"
+
+calendar.innerHTML=html
 finance.innerHTML=`
 Total reservas: R$ ${total.toFixed(2)} <br>
 Comissões: R$ ${totalCommission.toFixed(2)} <br>
