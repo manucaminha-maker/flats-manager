@@ -43,6 +43,15 @@ apt,guest,checkin,checkout,value,operator,cleaning,commission,net,cleaningDone:f
 
 }
 
+window.markCleaningDone = function(id){
+
+const cleaningRef = ref(db,"reservations/"+id)
+
+update(cleaningRef,{
+cleaningDone:true
+})
+
+}
 const table=document.querySelector("#table tbody")
 const alerts=document.getElementById("alerts")
 const map=document.getElementById("map")
