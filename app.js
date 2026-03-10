@@ -56,6 +56,7 @@ const table=document.querySelector("#table tbody")
 const alerts=document.getElementById("alerts")
 const map=document.getElementById("map")
 const calendar=document.getElementById("calendar")
+const cleaningList=document.getElementById("cleaningList")
 const finance=document.getElementById("finance")
 
 const flats=["008A","223B","210D","114C","121A"]
