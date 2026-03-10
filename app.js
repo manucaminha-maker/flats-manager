@@ -73,12 +73,14 @@ Object.values(data).forEach(r=>{
 const tr=document.createElement("tr")
 
 tr.innerHTML=`
+<tr>
 <td>${r.apt}</td>
 <td>${r.guest}</td>
 <td>${r.checkin}</td>
 <td>${r.checkout}</td>
-<td>R$ ${r.value.toFixed(2)}</td>
-<td>R$ ${r.net.toFixed(2)}</td>
+<td>R$ ${(r.value || 0).toFixed(2)}</td>
+<td>R$ ${(r.net || 0).toFixed(2)}</td>
+</tr>
 `
 
 table.appendChild(tr)
