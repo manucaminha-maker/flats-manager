@@ -1,28 +1,34 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyCNnLYBh43H1z0lIkUvlg6hhSodHLeMwVQ",
-authDomain: "flats-manager-53e7c.firebaseapp.com",
-databaseURL: "https://flats-manager-53e7c-default-rtdb.firebaseio.com",
-projectId: "flats-manager-53e7c",
-storageBucket: "flats-manager-53e7c.firebasestorage.app",
-messagingSenderId: "916765346885",
-appId: "1:916765346885:web:5360917aaaae759234a72c"
-};
+const firebaseConfig={
+apiKey:"AIzaSyCNnLYBh43H1z0lIkUvlg6hhSodHLeMwVQ",
+authDomain:"flats-manager-53e7c.firebaseapp.com",
+databaseURL:"https://flats-manager-53e7c-default-rtdb.firebaseio.com",
+projectId:"flats-manager-53e7c",
+storageBucket:"flats-manager-53e7c.firebasestorage.app",
+messagingSenderId:"916765346885",
+appId:"1:916765346885:web:5360917aaaae759234a72c"
+}
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const reservationsRef = ref(db,"reservations");
+const app=initializeApp(firebaseConfig)
+const db=getDatabase(app)
+const reservationsRef=ref(db,"reservations")
 
-const commissions = {
+let reservationsCache={}
+
+const commissions={
 Airbnb:0.05,
 Booking:0.13,
 Decolar:0.17,
 Expedia:0.15,
 Direto:0,
 Outro:0
-};
+}
+
+function dateOverlap(aStart,aEnd,bStart,bEnd){
+return (aStart < bEnd && aEnd > bStart)
+}
 
 window.addReservation=function(){
 
@@ -33,6 +39,22 @@ const checkout=document.getElementById("checkout").value
 const value=parseFloat(document.getElementById("value").value)
 const operator=document.getElementById("operator").value
 const cleaning=parseFloat(document.getElementById("cleaning").value)
+
+for(const r of Object.values(reservationsCache)){
+
+if(r.apt===apt){
+
+if(dateOverlap(checkin,checkout,r.checkin,r.checkout)){
+
+alert("Este flat já está reservado nesse período")
+
+return
+
+}
+
+}
+
+}
 
 const commission=value*commissions[operator]
 const net=value-commission-cleaning
@@ -54,9 +76,33 @@ cleaningDone:false
 
 window.markCleaningDone=function(id){
 
-const cleaningRef=ref(db,"reservations/"+id)
+update(ref(db,"reservations/"+id),{cleaningDone:true})
 
-update(cleaningRef,{cleaningDone:true})
+}
+
+window.deleteReservation=function(id){
+
+if(confirm("Excluir reserva?")){
+
+remove(ref(db,"reservations/"+id))
+
+}
+
+}
+
+window.editReservation=function(id){
+
+const r=reservationsCache[id]
+
+document.getElementById("apt").value=r.apt
+document.getElementById("guest").value=r.guest
+document.getElementById("checkin").value=r.checkin
+document.getElementById("checkout").value=r.checkout
+document.getElementById("value").value=r.value
+document.getElementById("operator").value=r.operator
+document.getElementById("cleaning").value=r.cleaning
+
+deleteReservation(id)
 
 }
 
@@ -73,12 +119,16 @@ onValue(reservationsRef,(snapshot)=>{
 
 table.innerHTML=""
 alerts.innerHTML=""
-cleaningList.innerHTML=""
 map.innerHTML=""
+calendar.innerHTML=""
+cleaningList.innerHTML=""
 finance.innerHTML=""
 
 const data=snapshot.val()
+
 if(!data) return
+
+reservationsCache=data
 
 let total=0
 let totalCommission=0
@@ -87,12 +137,13 @@ let totalNet=0
 
 const now=new Date()
 
-const today=now.getFullYear()+"-"+("0"+(now.getMonth()+1)).slice(-2)+"-"+("0"+now.getDate()).slice(-2)
+const today=now.toISOString().split("T")[0]
 
 const tomorrowDate=new Date()
+
 tomorrowDate.setDate(tomorrowDate.getDate()+1)
 
-const tomorrow=tomorrowDate.getFullYear()+"-"+("0"+(tomorrowDate.getMonth()+1)).slice(-2)+"-"+("0"+tomorrowDate.getDate()).slice(-2)
+const tomorrow=tomorrowDate.toISOString().split("T")[0]
 
 Object.entries(data).forEach(([id,r])=>{
 
@@ -105,6 +156,10 @@ tr.innerHTML=`
 <td>${r.checkout}</td>
 <td>R$ ${(r.value||0).toFixed(2)}</td>
 <td>R$ ${(r.net||0).toFixed(2)}</td>
+<td>
+<button onclick="editReservation('${id}')">Editar</button>
+<button onclick="deleteReservation('${id}')">Excluir</button>
+</td>
 `
 
 table.appendChild(tr)
@@ -115,36 +170,28 @@ totalCleaning+=r.cleaning||0
 totalNet+=r.net||0
 
 if(r.checkin===today){
-alerts.innerHTML+=`<div>⚠️ Check-in hoje: ${r.guest} (${r.apt})</div>`
+alerts.innerHTML+=`⚠️ Check-in hoje: ${r.guest} (${r.apt})<br>`
 }
 
 if(r.checkin===tomorrow){
-alerts.innerHTML+=`<div>📅 Check-in amanhã: ${r.guest} (${r.apt})</div>`
+alerts.innerHTML+=`📅 Check-in amanhã: ${r.guest} (${r.apt})<br>`
 }
 
 if(r.checkout===today){
 
-alerts.innerHTML+=`<div>⚠️ Check-out hoje: ${r.guest} (${r.apt})</div>`
+alerts.innerHTML+=`⚠️ Check-out hoje: ${r.guest} (${r.apt})<br>`
 
 if(!r.cleaningDone){
 
 alerts.innerHTML+=`
-<div>
 🧹 Faxina necessária: ${r.apt}
-<button onclick="markCleaningDone('${id}')">Faxina feita</button>
-</div>
+<button onclick="markCleaningDone('${id}')">Faxina feita</button><br>
 `
 
 cleaningList.innerHTML+=`
-<div>
-🧹 Flat ${r.apt} – saída de ${r.guest}
-<button onclick="markCleaningDone('${id}')">✔</button>
-</div>
+🧹 ${r.apt} – saída de ${r.guest}
+<button onclick="markCleaningDone('${id}')">✔</button><br>
 `
-
-}else{
-
-alerts.innerHTML+=`<div>✅ Faxina feita: ${r.apt}</div>`
 
 }
 
@@ -171,63 +218,10 @@ status="🔴"
 const div=document.createElement("div")
 div.className="flat"
 div.innerHTML=`${f} ${status}`
+
 map.appendChild(div)
 
 })
-
-calendar.innerHTML=""
-
-let html="<table border='1'><tr><th>Flat</th>"
-
-for(let d=1;d<=31;d++){
-html+=`<th>${d}</th>`
-}
-
-html+="</tr>"
-
-flats.forEach(f=>{
-
-html+=`<tr><td>${f}</td>`
-
-for(let d=1;d<=31;d++){
-
-let status="🟢"
-
-Object.values(data).forEach(r=>{
-
-if(r.apt===f){
-
-const month=new Date().toISOString().slice(0,7)
-const day=("0"+d).slice(-2)
-const date=`${month}-${day}`
-
-if(date>=r.checkin && date<r.checkout){
-status="🔴"
-}
-
-if(date===r.checkin){
-status="🟡"
-}
-
-if(date===r.checkout){
-status="🟠"
-}
-
-}
-
-})
-
-html+=`<td>${status}</td>`
-
-}
-
-html+="</tr>"
-
-})
-
-html+="</table>"
-
-calendar.innerHTML=html
 
 finance.innerHTML=`
 Total reservas: R$ ${total.toFixed(2)} <br>
