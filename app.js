@@ -3,13 +3,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCNnLYBh43H1z0lIkUvlg6hhSodHLeMwVQ",
-  authDomain: "flats-manager-53e7c.firebaseapp.com",
-  databaseURL: "https://flats-manager-53e7c-default-rtdb.firebaseio.com",
-  projectId: "flats-manager-53e7c",
-  storageBucket: "flats-manager-53e7c.firebasestorage.app",
-  messagingSenderId: "916765346885",
-  appId: "1:916765346885:web:5360917aaaae759234a72c"
+apiKey: "AIzaSyCNnLYBh43H1z0lIkUvlg6hhSodHLeMwVQ",
+authDomain: "flats-manager-53e7c.firebaseapp.com",
+databaseURL: "https://flats-manager-53e7c-default-rtdb.firebaseio.com",
+projectId: "flats-manager-53e7c",
+storageBucket: "flats-manager-53e7c.firebasestorage.app",
+messagingSenderId: "916765346885",
+appId: "1:916765346885:web:5360917aaaae759234a72c"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -25,8 +25,8 @@ Direto:0,
 Outro:0
 }
 
-window.addReservation = function(){ 
- 
+window.addReservation = function(){
+
 const apt=document.getElementById("apt").value
 const guest=document.getElementById("guest").value
 const checkin=document.getElementById("checkin").value
@@ -42,6 +42,7 @@ push(reservationsRef,{
 apt,guest,checkin,checkout,value,operator,cleaning,commission,net
 })
 
+}
 
 const table=document.querySelector("#table tbody")
 const alerts=document.getElementById("alerts")
@@ -72,14 +73,12 @@ Object.values(data).forEach(r=>{
 const tr=document.createElement("tr")
 
 tr.innerHTML=`
-<tr>
 <td>${r.apt}</td>
 <td>${r.guest}</td>
 <td>${r.checkin}</td>
 <td>${r.checkout}</td>
 <td>R$ ${(r.value || 0).toFixed(2)}</td>
 <td>R$ ${(r.net || 0).toFixed(2)}</td>
-</tr>
 `
 
 table.appendChild(tr)
@@ -105,8 +104,6 @@ let status="🟢"
 
 Object.values(data).forEach(r=>{
 
-const today=new Date().toISOString().split("T")[0]
-
 if(r.apt===f){
 
 if(today>=r.checkin && today<r.checkout){
@@ -128,13 +125,6 @@ status="🟠"
 const div=document.createElement("div")
 div.className="flat"
 div.innerHTML=`${f} ${status}`
-map.appendChild(div)
-
-})
-
-const div=document.createElement("div")
-div.className="flat"
-div.innerHTML=occupied?`${f} 🔴`:`${f} 🟢`
 map.appendChild(div)
 
 })
