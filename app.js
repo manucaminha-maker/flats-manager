@@ -1,24 +1,26 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-apiKey: "AIzaSyCNnLYBh43H1z0lIkUvlg6hhSodHLeMwVQ",
-authDomain: "flats-manager-53e7c.firebaseapp.com",
-databaseURL: "https://flats-manager-53e7c-default-rtdb.firebaseio.com",
-projectId: "flats-manager-53e7c",
-storageBucket: "flats-manager-53e7c.firebasestorage.app",
-messagingSenderId: "916765346885",
-appId: "1:916765346885:web:5360917aaaae759234a72c"
+const firebaseConfig={
+apiKey:"AIzaSyCNnLYBh43H1z0lIkUvlg6hhSodHLeMwVQ",
+authDomain:"flats-manager-53e7c.firebaseapp.com",
+databaseURL:"https://flats-manager-53e7c-default-rtdb.firebaseio.com",
+projectId:"flats-manager-53e7c",
+storageBucket:"flats-manager-53e7c.firebasestorage.app",
+messagingSenderId:"916765346885",
+appId:"1:916765346885:web:5360917aaaae759234a72c"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const reservationsRef = ref(db,"reservations");
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+const reservationsRef=ref(db,"reservations");
 
-let reservationsCache = {};
-let editingId = null;
+let reservationsCache={};
+let editingId=null;
 
-const commissions = {
+const flats=["008A","223B","210D","114C","121A"];
+
+const commissions={
 Airbnb:0.05,
 Booking:0.13,
 Decolar:0.17,
@@ -28,10 +30,10 @@ Outro:0
 };
 
 function overlap(a1,a2,b1,b2){
-return a1 < b2 && a2 > b1;
+return a1<b2 && a2>b1;
 }
 
-window.addReservation = function(){
+window.addReservation=function(){
 
 const apt=document.getElementById("apt").value;
 const guest=document.getElementById("guest").value;
@@ -46,12 +48,10 @@ for(const r of Object.values(reservationsCache)){
 if(editingId && r===reservationsCache[editingId]) continue;
 
 if(r.apt===apt){
-
 if(overlap(checkin,checkout,r.checkin,r.checkout)){
 alert("Este flat já está reservado nesse período");
 return;
 }
-
 }
 
 }
@@ -60,62 +60,43 @@ const commission=value*commissions[operator];
 const net=value-commission-cleaning;
 
 const data={
-apt,
-guest,
-checkin,
-checkout,
-value,
-operator,
-cleaning,
-commission,
-net
+apt,guest,checkin,checkout,value,operator,cleaning,commission,net
 };
 
 if(editingId){
-
 update(ref(db,"reservations/"+editingId),data);
 editingId=null;
-
 }else{
-
-push(reservationsRef,{
-...data,
-cleaningDone:false
-});
-
+push(reservationsRef,{...data,cleaningDone:false});
 }
 
-}
+};
 
-window.editReservation = function(id){
+window.editReservation=function(id){
 
-const r = reservationsCache[id];
+const r=reservationsCache[id];
 
-document.getElementById("apt").value = r.apt;
-document.getElementById("guest").value = r.guest;
-document.getElementById("checkin").value = r.checkin;
-document.getElementById("checkout").value = r.checkout;
-document.getElementById("value").value = r.value;
-document.getElementById("operator").value = r.operator;
-document.getElementById("cleaning").value = r.cleaning;
+document.getElementById("apt").value=r.apt;
+document.getElementById("guest").value=r.guest;
+document.getElementById("checkin").value=r.checkin;
+document.getElementById("checkout").value=r.checkout;
+document.getElementById("value").value=r.value;
+document.getElementById("operator").value=r.operator;
+document.getElementById("cleaning").value=r.cleaning;
 
-editingId = id;
+editingId=id;
 
-}
+};
 
-window.deleteReservation = function(id){
-
+window.deleteReservation=function(id){
 if(confirm("Excluir reserva?")){
 remove(ref(db,"reservations/"+id));
 }
+};
 
-}
-
-window.markCleaningDone = function(id){
-
+window.markCleaningDone=function(id){
 update(ref(db,"reservations/"+id),{cleaningDone:true});
-
-}
+};
 
 const table=document.querySelector("#table tbody");
 const alerts=document.getElementById("alerts");
@@ -123,8 +104,6 @@ const map=document.getElementById("map");
 const calendar=document.getElementById("calendar");
 const cleaningList=document.getElementById("cleaningList");
 const finance=document.getElementById("finance");
-
-const flats=["008A","223B","210D","114C","121A"];
 
 onValue(reservationsRef,(snapshot)=>{
 
@@ -192,6 +171,77 @@ cleaningList.innerHTML+=`
 }
 
 });
+
+flats.forEach(f=>{
+
+let status="🟢";
+
+Object.values(data).forEach(r=>{
+if(r.apt===f){
+if(today>=r.checkin && today<r.checkout){
+status="🔴";
+}
+}
+});
+
+const div=document.createElement("div");
+div.className="flat";
+div.innerHTML=`${f} ${status}`;
+map.appendChild(div);
+
+});
+
+let html="<table class='calendar'><tr><th>Flat</th>";
+
+for(let d=1;d<=31;d++){
+html+=`<th>${d}</th>`;
+}
+
+html+="</tr>";
+
+flats.forEach(f=>{
+
+html+=`<tr><td>${f}</td>`;
+
+for(let d=1;d<=31;d++){
+
+let className="free";
+
+Object.values(data).forEach(r=>{
+
+if(r.apt===f){
+
+const month=new Date().toISOString().slice(0,7);
+const day=("0"+d).slice(-2);
+const date=`${month}-${day}`;
+
+if(date>=r.checkin && date<r.checkout){
+className="occupied";
+}
+
+if(date===r.checkin){
+className="checkin";
+}
+
+if(date===r.checkout){
+className="checkout";
+}
+
+}
+
+});
+
+html+=`<td class="${className}"></td>`;
+
+}
+
+html+="</tr>";
+
+});
+
+html+="</table>";
+
+calendar.innerHTML=html;
 
 finance.innerHTML=`
 Total reservas: R$ ${total.toFixed(2)} <br>
